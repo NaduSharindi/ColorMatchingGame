@@ -12,4 +12,5 @@ struct GridCell: Identifiable {
     var color: Color
     var isMatched: Bool = false
     var isSelected: Bool = false
+    var isWrong: Bool = false
 }
