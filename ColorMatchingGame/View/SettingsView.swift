@@ -1,3 +1,5 @@
+import SwiftUI
+
 struct SettingsView: View {
     @AppStorage("soundEnabled") private var soundEnabled = true
     @AppStorage("musicEnabled") private var musicEnabled = true

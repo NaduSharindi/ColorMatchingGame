@@ -1,10 +1,3 @@
-//
-//  GameView.swift
-//  ColorMatchingGame
-//
-//  Created by COBSCCOMP242P-063 on 2026-01-16.
-//
-
 import SwiftUI
 
 struct GameView: View {
@@ -118,7 +111,7 @@ struct GameView: View {
                 // Game Over/Win Screen
                 if viewModel.isGameOver {
                     VStack(spacing: 20) {
-                        Text(viewModel.isGameWon ? "🎉 You Win! 🎉" : "Game Over")
+                        Text(viewModel.isGameWon ? "You Win!" : "Game Over")
                             .font(.largeTitle)
                             .bold()
                             .foregroundColor(viewModel.isGameWon ? .green : .red)
@@ -127,7 +120,7 @@ struct GameView: View {
                             .font(.title2)
                         
                         if viewModel.score == viewModel.bestScore && viewModel.isGameWon {
-                            Text("🏆 New High Score! 🏆")
+                            Text("New High Score!")
                                 .font(.headline)
                                 .foregroundColor(.yellow)
                         }

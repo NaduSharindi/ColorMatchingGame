@@ -1,11 +1,20 @@
-//
-//  MenuView.swift
-//  ColorMatchingGame
-//
-//  Created by COBSCCOMP242P-063 on 2026-01-16.
-//
-
 import SwiftUI
+
+// MARK: - Hex Color Extension
+extension Color {
+    init(hex: String) {
+        let scanner = Scanner(string: hex)
+        _ = scanner.scanString("#") // skip #
+        var rgb: UInt64 = 0
+        scanner.scanHexInt64(&rgb)
+        
+        let r = Double((rgb >> 16) & 0xFF) / 255
+        let g = Double((rgb >> 8) & 0xFF) / 255
+        let b = Double(rgb & 0xFF) / 255
+        
+        self.init(red: r, green: g, blue: b)
+    }
+}
 
 struct MenuView: View {
     @AppStorage("soundEnabled") private var soundEnabled = true
@@ -15,8 +24,7 @@ struct MenuView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                LinearGradient(gradient: Gradient(colors: [.blue, .purple]),
-                             startPoint: .topLeading, endPoint: .bottomTrailing)
+                Color.white
                     .ignoresSafeArea()
                 
                 VStack(spacing: 30) {
@@ -24,12 +32,11 @@ struct MenuView: View {
                     VStack {
                         Text("COLOR BASHER")
                             .font(.system(size: 42, weight: .black, design: .rounded))
-                            .foregroundColor(.white)
-                            .shadow(radius: 5)
+                            .foregroundColor(.black)
                         
                         Text("Match colors, build combos!")
                             .font(.headline)
-                            .foregroundColor(.white.opacity(0.8))
+                            .foregroundColor(.gray)
                     }
                     .padding(.top, 40)
                     
@@ -39,13 +46,13 @@ struct MenuView: View {
                     VStack(spacing: 15) {
                         Text("SELECT MODE")
                             .font(.headline)
-                            .foregroundColor(.white.opacity(0.9))
+                            .foregroundColor(.black)
                             .padding(.bottom, 10)
                         
                         GameModeButton(
                             title: "CLASSIC",
                             subtitle: "One wrong = Game Over",
-                            color: .green,
+                            color: Color(hex: "#C07DFF"),
                             mode: .classic,
                             selectedMode: $selectedMode
                         )
@@ -53,7 +60,7 @@ struct MenuView: View {
                         GameModeButton(
                             title: "SURVIVAL",
                             subtitle: "3 Lives • Lives System",
-                            color: .orange,
+                            color: Color(hex: "#FFA652"),
                             mode: .survival,
                             selectedMode: $selectedMode
                         )
@@ -61,7 +68,7 @@ struct MenuView: View {
                         GameModeButton(
                             title: "TIME ATTACK",
                             subtitle: "60 Seconds • Beat the Clock",
-                            color: .red,
+                            color: Color(hex: "#63CEFF"),
                             mode: .timeAttack,
                             selectedMode: $selectedMode
                         )
@@ -74,19 +81,19 @@ struct MenuView: View {
                     VStack(spacing: 15) {
                         Text("SELECT DIFFICULTY")
                             .font(.headline)
-                            .foregroundColor(.white.opacity(0.9))
+                            .foregroundColor(.black)
                         
                         HStack(spacing: 20) {
                             NavigationLink(destination: GameView(gridSize: 3, mode: selectedMode)) {
-                                DifficultyButton(title: "EASY", color: .green, size: 3)
+                                DifficultyButton(title: "EASY", color: Color(hex: "#4CAF50"), size: 3) // Medium Green
                             }
                             
                             NavigationLink(destination: GameView(gridSize: 5, mode: selectedMode)) {
-                                DifficultyButton(title: "MEDIUM", color: .yellow, size: 5)
+                                DifficultyButton(title: "MEDIUM", color: Color(hex: "#FBC02D"), size: 5) // Golden Yellow
                             }
                             
                             NavigationLink(destination: GameView(gridSize: 7, mode: selectedMode)) {
-                                DifficultyButton(title: "HARD", color: .red, size: 7)
+                                DifficultyButton(title: "HARD", color: Color(hex: "#D32F2F"), size: 7) // Crimson Red
                             }
                         }
                     }
@@ -98,9 +105,9 @@ struct MenuView: View {
                         Button(action: { showSettings.toggle() }) {
                             Image(systemName: "gear")
                                 .font(.title2)
-                                .foregroundColor(.white)
+                                .foregroundColor(.black)
                                 .padding()
-                                .background(Color.white.opacity(0.2))
+                                .background(Color.black.opacity(0.1))
                                 .clipShape(Circle())
                         }
                         
@@ -111,10 +118,10 @@ struct MenuView: View {
                                 Image(systemName: "trophy.fill")
                                 Text("High Scores")
                             }
-                            .foregroundColor(.white)
+                            .foregroundColor(.black)
                             .padding(.horizontal, 20)
                             .padding(.vertical, 10)
-                            .background(Color.yellow.opacity(0.3))
+                            .background(Color.gray.opacity(0.2))
                             .cornerRadius(20)
                         }
                     }
@@ -129,6 +136,7 @@ struct MenuView: View {
     }
 }
 
+// MARK: - Game Mode Button
 struct GameModeButton: View {
     let title: String
     let subtitle: String
@@ -157,16 +165,13 @@ struct GameModeButton: View {
                 }
             }
             .padding()
-            .background(color.opacity(selectedMode == mode ? 0.8 : 0.5))
+            .background(color)
             .cornerRadius(15)
-            .overlay(
-                RoundedRectangle(cornerRadius: 15)
-                    .stroke(Color.white.opacity(0.3), lineWidth: 2)
-            )
         }
     }
 }
 
+// MARK: - Difficulty Button
 struct DifficultyButton: View {
     let title: String
     let color: Color
@@ -182,11 +187,7 @@ struct DifficultyButton: View {
                 .foregroundColor(.white.opacity(0.8))
         }
         .frame(width: 100, height: 80)
-        .background(color.opacity(0.7))
+        .background(color)
         .cornerRadius(15)
-        .overlay(
-            RoundedRectangle(cornerRadius: 15)
-                .stroke(Color.white.opacity(0.5), lineWidth: 3)
-        )
     }
 }
