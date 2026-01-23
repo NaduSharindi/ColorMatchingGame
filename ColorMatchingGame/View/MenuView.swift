@@ -20,6 +20,7 @@ struct MenuView: View {
     @AppStorage("soundEnabled") private var soundEnabled = true
     @State private var showSettings = false
     @State private var selectedMode: GameViewModel.GameMode = .classic
+    @State private var playerName = ""
     
     var body: some View {
         NavigationStack {
@@ -41,6 +42,12 @@ struct MenuView: View {
                     .padding(.top, 40)
                     
                     Spacer()
+                    
+                    TextField("Enter your name", text: $playerName)
+                        .padding()
+                        .background(Color.gray.opacity(0.2))
+                        .cornerRadius(10)
+                        .padding(.horizontal)
                     
                     // Game Modes
                     VStack(spacing: 15) {
@@ -84,17 +91,39 @@ struct MenuView: View {
                             .foregroundColor(.black)
                         
                         HStack(spacing: 20) {
-                            NavigationLink(destination: GameView(gridSize: 3, mode: selectedMode)) {
-                                DifficultyButton(title: "EASY", color: Color(hex: "#4CAF50"), size: 3) // Medium Green
+                            NavigationLink(
+                                destination: GameView(
+                                    gridSize: 3,
+                                    mode: selectedMode,
+                                    playerName: playerName
+                                )
+                            ) {
+                                DifficultyButton(title: "EASY", color: Color(hex: "#4CAF50"), size: 3)
                             }
+                            .disabled(playerName.isEmpty)
                             
-                            NavigationLink(destination: GameView(gridSize: 5, mode: selectedMode)) {
-                                DifficultyButton(title: "MEDIUM", color: Color(hex: "#FBC02D"), size: 5) // Golden Yellow
+                            NavigationLink(
+                                destination: GameView(
+                                    gridSize: 3,
+                                    mode: selectedMode,
+                                    playerName: playerName
+                                )
+                            ) {
+                                DifficultyButton(title: "MEDIUM", color: Color(hex: "#FBC02D"), size: 5)
                             }
+                            .disabled(playerName.isEmpty)
                             
-                            NavigationLink(destination: GameView(gridSize: 7, mode: selectedMode)) {
-                                DifficultyButton(title: "HARD", color: Color(hex: "#D32F2F"), size: 7) // Crimson Red
+                            NavigationLink(
+                                destination: GameView(
+                                    gridSize: 3,
+                                    mode: selectedMode,
+                                    playerName: playerName
+                                )
+                            ) {
+                                DifficultyButton(title: "HARD", color: Color(hex: "#D32F2F"), size: 5)
                             }
+                            .disabled(playerName.isEmpty)
+                            
                         }
                     }
                     

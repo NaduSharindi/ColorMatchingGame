@@ -45,10 +45,14 @@ class GameViewModel: ObservableObject {
         "combo": "combo_sound"
     ]
     
-    init(gridSize: Int, mode: GameMode = .classic) {
+    let playerName: String
+    
+    init(gridSize: Int, mode: GameMode = .classic, playerName: String) {
+        self.playerName = playerName
         self.gameMode = mode
         startNewGame(gridSize: gridSize)
     }
+
     
     func startNewGame(gridSize: Int) {
         score = 0
@@ -201,12 +205,13 @@ class GameViewModel: ObservableObject {
         isGameOver = true
         isGameWon = won
         timer?.invalidate()
-        
+
         if won {
-            score += timeRemaining * 5 // Bonus for remaining time
-            score += lives * 20 // Bonus for remaining lives
-            checkAndSaveHighScore()
+            score += timeRemaining * 5
+            score += lives * 20
         }
+
+        ScoreManager.shared.saveScore(name: playerName, score: score)
     }
     
     private func checkAndSaveHighScore() {

@@ -6,11 +6,13 @@ struct GameView: View {
     @State private var showGameOver = false
     
     let gridSize: Int
+    let playerName: String
     private let spacing: CGFloat = 6
     
-    init(gridSize: Int, mode: GameViewModel.GameMode = .classic) {
-        _viewModel = StateObject(wrappedValue: GameViewModel(gridSize: gridSize, mode: mode))
+    init(gridSize: Int, mode: GameViewModel.GameMode = .classic, playerName: String) {
+        _viewModel = StateObject(wrappedValue: GameViewModel(gridSize: gridSize, mode: mode, playerName: playerName))
         self.gridSize = gridSize
+        self.playerName = playerName
     }
     
     var body: some View {
