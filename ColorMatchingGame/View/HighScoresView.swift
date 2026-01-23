@@ -1,9 +1,11 @@
+import SwiftUI
+
 struct HighScoresView: View {
     @AppStorage("bestScore") private var bestScore = 0
     
     var body: some View {
         VStack(spacing: 30) {
-            Text("🏆 HIGH SCORES 🏆")
+            Text("HIGH SCORES")
                 .font(.largeTitle)
                 .bold()
                 .foregroundColor(.orange)
