@@ -88,7 +88,10 @@ class GameViewModel: ObservableObject {
         allColors.shuffle()
         
         // Create grid cells
-        grid = allColors.map { GridCell(color: $0) }
+        grid = allColors.map { color in
+            let colorID = normalColors.firstIndex(where: { $0 == color }) ?? 0
+            return GridCell(colorID: colorID, color: color)
+        }
         
         // Play start sound
         playSound("tap")
@@ -243,3 +246,4 @@ class GameViewModel: ObservableObject {
         timer?.invalidate()
     }
 }
+
