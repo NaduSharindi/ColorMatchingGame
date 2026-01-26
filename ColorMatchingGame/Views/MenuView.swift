@@ -1,222 +1,227 @@
 import SwiftUI
 
-// MARK: - Hex Color Extension
-extension Color {
-    init(hex: String) {
-        let scanner = Scanner(string: hex)
-        _ = scanner.scanString("#") // skip #
-        var rgb: UInt64 = 0
-        scanner.scanHexInt64(&rgb)
-        
-        let r = Double((rgb >> 16) & 0xFF) / 255
-        let g = Double((rgb >> 8) & 0xFF) / 255
-        let b = Double(rgb & 0xFF) / 255
-        
-        self.init(red: r, green: g, blue: b)
-    }
-}
-
 struct MenuView: View {
     @AppStorage("soundEnabled") private var soundEnabled = true
     @State private var showSettings = false
+    @State private var showTutorial = false
     @State private var selectedMode: GameViewModel.GameMode = .classic
-    @State private var playerName = ""
+    @State private var difficulty: Difficulty = .easy
+    @State private var showAccessibility = false
+    
+    let playerName: String
+    
+    enum Difficulty: String, CaseIterable {
+        case easy = "Easy (3×3)"
+        case medium = "Medium (5×5)"
+        case hard = "Hard (7×7)"
+        
+        var gridSize: Int {
+            switch self {
+            case .easy: return 3
+            case .medium: return 5
+            case .hard: return 7
+            }
+        }
+        
+        var color: Color {
+            switch self {
+            case .easy: return Color(hex: "4CAF50") // Green
+            case .medium: return Color(hex: "FF9800") // Orange
+            case .hard: return Color(hex: "F44336") // Red
+            }
+        }
+    }
     
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.white
+                Color(.systemBackground)
                     .ignoresSafeArea()
                 
-                VStack(spacing: 30) {
-                    // Title
-                    VStack {
-                        Text("COLOR BASHER")
-                            .font(.system(size: 42, weight: .black, design: .rounded))
-                            .foregroundColor(.black)
-                        
-                        Text("Match colors, build combos!")
-                            .font(.headline)
-                            .foregroundColor(.gray)
-                    }
-                    .padding(.top, 40)
-                    
-                    Spacer()
-                    
-                    TextField("Enter your name", text: $playerName)
-                        .padding()
-                        .background(Color.gray.opacity(0.2))
-                        .cornerRadius(10)
-                        .padding(.horizontal)
-                    
-                    // Game Modes
-                    VStack(spacing: 15) {
-                        Text("SELECT MODE")
-                            .font(.headline)
-                            .foregroundColor(.black)
-                            .padding(.bottom, 10)
-                        
-                        GameModeButton(
-                            title: "CLASSIC",
-                            subtitle: "One wrong = Game Over",
-                            color: Color(hex: "#C07DFF"),
-                            mode: .classic,
-                            selectedMode: $selectedMode
-                        )
-                        
-                        GameModeButton(
-                            title: "SURVIVAL",
-                            subtitle: "3 Lives • Lives System",
-                            color: Color(hex: "#FFA652"),
-                            mode: .survival,
-                            selectedMode: $selectedMode
-                        )
-                        
-                        GameModeButton(
-                            title: "TIME ATTACK",
-                            subtitle: "60 Seconds • Beat the Clock",
-                            color: Color(hex: "#63CEFF"),
-                            mode: .timeAttack,
-                            selectedMode: $selectedMode
-                        )
-                    }
-                    .padding(.horizontal)
-                    
-                    Spacer()
-                    
-                    // Difficulty Selection
-                    VStack(spacing: 15) {
-                        Text("SELECT DIFFICULTY")
-                            .font(.headline)
-                            .foregroundColor(.black)
-                        
-                        HStack(spacing: 20) {
-                            NavigationLink(
-                                destination: GameView(
-                                    gridSize: 3,
-                                    mode: selectedMode,
-                                    playerName: playerName
-                                )
-                            ) {
-                                DifficultyButton(title: "EASY", color: Color(hex: "#4CAF50"), size: 3)
-                            }
-                            .disabled(playerName.isEmpty)
-                            
-                            NavigationLink(
-                                destination: GameView(
-                                    gridSize: 3,
-                                    mode: selectedMode,
-                                    playerName: playerName
-                                )
-                            ) {
-                                DifficultyButton(title: "MEDIUM", color: Color(hex: "#FBC02D"), size: 5)
-                            }
-                            .disabled(playerName.isEmpty)
-                            
-                            NavigationLink(
-                                destination: GameView(
-                                    gridSize: 3,
-                                    mode: selectedMode,
-                                    playerName: playerName
-                                )
-                            ) {
-                                DifficultyButton(title: "HARD", color: Color(hex: "#D32F2F"), size: 5)
-                            }
-                            .disabled(playerName.isEmpty)
-                            
-                        }
-                    }
-                    
-                    Spacer()
-                    
-                    // Bottom Buttons
-                    HStack {
-                        Button(action: { showSettings.toggle() }) {
-                            Image(systemName: "gear")
+                ScrollView {
+                    VStack(spacing: 30) {
+                        // Header with improved spacing
+                        VStack(spacing: 8) {
+                            Text("Welcome,")
                                 .font(.title2)
-                                .foregroundColor(.black)
-                                .padding()
-                                .background(Color.black.opacity(0.1))
-                                .clipShape(Circle())
+                                .foregroundColor(.secondary)
+                            
+                            Text(playerName)
+                                .font(.largeTitle.bold())
+                                .foregroundColor(.primary)
+                                .padding(.bottom, 20)
                         }
+                        .padding(.top, 30)
                         
-                        Spacer()
-                        
-                        NavigationLink(destination: HighScoresView()) {
-                            HStack {
-                                Image(systemName: "trophy.fill")
-                                Text("High Scores")
+                        // Game Modes with proper layout
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("SELECT MODE")
+                                .font(.headline)
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal, 20)
+                            
+                            VStack(spacing: 12) {
+                                ForEach([GameViewModel.GameMode.classic, .survival, .timeAttack], id: \.self) { mode in
+                                    GameModeCard(
+                                        title: mode.title,
+                                        subtitle: mode.subtitle,
+                                        icon: mode.icon,
+                                        color: mode.color,
+                                        isSelected: selectedMode == mode
+                                    )
+                                    .onTapGesture {
+                                        selectedMode = mode
+                                    }
+                                    .padding(.horizontal, 20)
+                                    .accessibilityElement(children: .combine)
+                                    .accessibilityLabel("\(mode.title) mode, \(mode.subtitle)")
+                                    .accessibilityAddTraits(selectedMode == mode ? [.isSelected] : [])
+                                }
                             }
-                            .foregroundColor(.black)
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 10)
-                            .background(Color.gray.opacity(0.2))
-                            .cornerRadius(20)
                         }
+                        
+                        // Difficulty Selection with proper layout
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("SELECT DIFFICULTY")
+                                .font(.headline)
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal, 20)
+                            
+                            HStack(spacing: 12) {
+                                ForEach(Difficulty.allCases, id: \.self) { diff in
+                                    DifficultyCard(
+                                        title: diff.rawValue,
+                                        color: diff.color,
+                                        isSelected: difficulty == diff
+                                    )
+                                    .onTapGesture {
+                                        difficulty = diff
+                                    }
+                                    .accessibilityElement(children: .combine)
+                                    .accessibilityLabel(diff.rawValue)
+                                    .accessibilityAddTraits(difficulty == diff ? [.isSelected] : [])
+                                }
+                            }
+                            .padding(.horizontal, 20)
+                        }
+                        
+                        // Play Button
+                        NavigationLink(
+                            destination: GameView(
+                                gridSize: difficulty.gridSize,
+                                mode: selectedMode,
+                                playerName: playerName
+                            )
+                        ) {
+                            HStack {
+                                Image(systemName: "play.circle.fill")
+                                    .font(.title2)
+                                Text("PLAY NOW")
+                                    .font(.title2.bold())
+                            }
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(
+                                LinearGradient(gradient: Gradient(colors: [Color.blue, Color.purple]),
+                                             startPoint: .leading,
+                                             endPoint: .trailing)
+                            )
+                            .cornerRadius(20)
+                            .shadow(radius: 10)
+                        }
+                        .padding(.horizontal, 40)
+                        .padding(.top, 10)
+                        .accessibilityLabel("Play now button")
+                        .accessibilityHint("Start the game with selected mode and difficulty")
+                        
+                        Spacer(minLength: 20)
+                        
+                        // Bottom Buttons with improved layout
+                        HStack(spacing: 12) {
+                            Button(action: { showTutorial.toggle() }) {
+                                VStack(spacing: 8) {
+                                    Image(systemName: "questionmark.circle.fill")
+                                        .font(.title2)
+                                    Text("How to Play")
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                }
+                                .foregroundColor(.primary)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(Color.gray.opacity(0.1))
+                                .cornerRadius(15)
+                            }
+                            .accessibilityLabel("How to play tutorial")
+                            
+                            Button(action: { showAccessibility.toggle() }) {
+                                VStack(spacing: 8) {
+                                    Image(systemName: "accessibility.fill")
+                                        .font(.title2)
+                                    Text("Accessibility")
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                }
+                                .foregroundColor(.primary)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(Color.gray.opacity(0.1))
+                                .cornerRadius(15)
+                            }
+                            .accessibilityLabel("Accessibility settings")
+                            
+                            Button(action: { showSettings.toggle() }) {
+                                VStack(spacing: 8) {
+                                    Image(systemName: "gear")
+                                        .font(.title2)
+                                    Text("Settings")
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                }
+                                .foregroundColor(.primary)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(Color.gray.opacity(0.1))
+                                .cornerRadius(15)
+                            }
+                            .accessibilityLabel("Game settings")
+                            
+                            NavigationLink(destination: HighScoresView()) {
+                                VStack(spacing: 8) {
+                                    Image(systemName: "trophy.fill")
+                                        .font(.title2)
+                                    Text("High Scores")
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                }
+                                .foregroundColor(.primary)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(Color.gray.opacity(0.1))
+                                .cornerRadius(15)
+                            }
+                            .accessibilityLabel("High scores leaderboard")
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 40)
                     }
-                    .padding(.horizontal, 40)
-                    .padding(.bottom, 30)
                 }
             }
+            .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $showSettings) {
                 SettingsView()
             }
-        }
-    }
-}
-
-// MARK: - Game Mode Button
-struct GameModeButton: View {
-    let title: String
-    let subtitle: String
-    let color: Color
-    let mode: GameViewModel.GameMode
-    @Binding var selectedMode: GameViewModel.GameMode
-    
-    var body: some View {
-        Button(action: { selectedMode = mode }) {
-            HStack {
-                VStack(alignment: .leading) {
-                    Text(title)
-                        .font(.headline)
-                        .foregroundColor(.white)
-                    Text(subtitle)
-                        .font(.caption)
-                        .foregroundColor(.white.opacity(0.8))
-                }
-                
-                Spacer()
-                
-                if selectedMode == mode {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.white)
-                        .font(.title2)
-                }
+            .sheet(isPresented: $showTutorial) {
+                TutorialView()
             }
-            .padding()
-            .background(color)
-            .cornerRadius(15)
+            .sheet(isPresented: $showAccessibility) {
+                AccessibilitySettingsView()
+            }
         }
     }
 }
 
-// MARK: - Difficulty Button
-struct DifficultyButton: View {
-    let title: String
-    let color: Color
-    let size: Int
-    
-    var body: some View {
-        VStack {
-            Text(title)
-                .font(.headline)
-                .foregroundColor(.white)
-            Text("\(size)×\(size)")
-                .font(.caption)
-                .foregroundColor(.white.opacity(0.8))
-        }
-        .frame(width: 100, height: 80)
-        .background(color)
-        .cornerRadius(15)
-    }
+#Preview {
+    MenuView(playerName: "Test Player")
 }

@@ -6,8 +6,8 @@ struct CellView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 12)
-                .fill(cell.isMatched ? cell.color.opacity(0.3) : 
-                      cell.isWrong ? Color.red.opacity(0.3) : 
+                .fill(cell.isMatched ? cell.color.opacity(0.3) :
+                      cell.isWrong ? Color.red.opacity(0.3) :
                       cell.isSelected ? cell.color : Color.gray.opacity(0.3))
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
@@ -30,7 +30,19 @@ struct CellView: View {
                     .transition(.scale.combined(with: .opacity))
             }
         }
-        .shadow(color: cell.isSelected ? cell.color.opacity(0.5) : Color.black.opacity(0.1), 
+        .shadow(color: cell.isSelected ? cell.color.opacity(0.5) : Color.black.opacity(0.1),
                 radius: cell.isSelected ? 8 : 2)
     }
+}
+
+#Preview {
+    HStack {
+        CellView(cell: GridCell(color: .red))
+            .frame(width: 80, height: 80)
+        CellView(cell: GridCell(color: .blue, isSelected: true))
+            .frame(width: 80, height: 80)
+        CellView(cell: GridCell(color: .green, isMatched: true))
+            .frame(width: 80, height: 80)
+    }
+    .padding()
 }
